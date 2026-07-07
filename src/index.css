@@ -1,0 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  
+  --color-colonial-beige: #F9F6F2;
+  --color-colonial-cream: #F5EFEB;
+  --color-colonial-sand: #E8E2D9;
+  --color-colonial-clay: #D47A55;
+  --color-colonial-terracotta: #C05621;
+  --color-colonial-terracotta-dark: #8C3B14;
+  --color-colonial-gold: #967026;
+  --color-colonial-gold-light: #E0D1B5;
+  --color-colonial-dark: #2D1B08;
+  --color-colonial-dark-light: #3E2D1B;
+  --color-colonial-forest: #1E3F20;
+  --color-colonial-forest-dark: #122814;
+}
+
+/* Custom styles and custom scrollbars to enhance UI elegance */
+@layer base {
+  body {
+    background-color: var(--color-colonial-beige);
+    color: var(--color-colonial-dark);
+    font-family: var(--font-sans);
+    overflow-x: hidden;
+  }
+
+  /* Custom scrollbar for an elegant colonial historical feeling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-colonial-beige);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-colonial-terracotta);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-colonial-terracotta-dark);
+  }
+}
+
+/* Subtle minimal background texture or pattern */
+.parchment-pattern {
+  background-color: var(--color-colonial-beige);
+  background-image: radial-gradient(var(--color-colonial-sand) 0.5px, transparent 0.5px);
+  background-size: 24px 24px;
+}
+
+/* Custom typography decorations */
+.colonial-border-top {
+  border-top: 1px solid rgba(45, 27, 8, 0.15);
+}
+
+.colonial-border-bottom {
+  border-bottom: 1px solid rgba(45, 27, 8, 0.15);
+}
+
+.title-ornament::before, .title-ornament::after {
+  content: " — ";
+  color: var(--color-colonial-terracotta);
+  font-family: var(--font-display);
+  font-size: 0.9em;
+  padding: 0 0.5rem;
+}
+
+/* Animation utilities */
+.animate-fade-in {
+  animation: fadeIn 0.8s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Diriangén: Resistencia y Música de Nicaragua",
+  "description": "Plataforma interactiva sobre el Cacique Diriangén, la resistencia indígena de 1523 y la música revolucionaria de Nicaragua.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
