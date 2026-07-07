@@ -27,12 +27,12 @@ export default function Navbar({ activeSection, setActiveSection }: NavbarProps)
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-colonial-dark text-colonial-beige border-b-2 border-colonial-gold/30 shadow-lg">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-full xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
         <div className="flex items-center justify-between h-20">
           {/* Logo / Brand */}
           <button
             onClick={() => handleNavClick("inicio")}
-            className="flex items-center space-x-3 group text-left cursor-pointer"
+            className="flex items-center space-x-3 group text-left cursor-pointer shrink-0"
           >
             <div className="bg-colonial-terracotta p-2.5 rounded-lg border border-colonial-gold/40 shadow-md group-hover:bg-colonial-terracotta-dark transition-colors duration-300">
               <Landmark className="w-6 h-6 text-colonial-gold-light" />
@@ -48,7 +48,7 @@ export default function Navbar({ activeSection, setActiveSection }: NavbarProps)
           </button>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex space-x-1">
+          <div className="hidden lg:flex lg:space-x-1 xl:space-x-1.5 ml-4">
             {navigationItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeSection === item.id;
@@ -56,13 +56,13 @@ export default function Navbar({ activeSection, setActiveSection }: NavbarProps)
                 <button
                   key={item.id}
                   onClick={() => handleNavClick(item.id)}
-                  className={`flex items-center space-x-2 px-4 py-2.5 rounded-md font-medium text-sm tracking-wide transition-all duration-300 cursor-pointer ${
+                  className={`flex items-center space-x-1.5 lg:space-x-1 xl:space-x-2 lg:px-2 xl:px-3.5 py-2.5 rounded-md font-semibold lg:text-xs xl:text-sm tracking-wide transition-all duration-300 cursor-pointer whitespace-nowrap ${
                     isActive
                       ? "bg-colonial-terracotta text-white shadow-md border-b-2 border-colonial-gold-light"
                       : "text-colonial-sand hover:bg-colonial-dark-light hover:text-white"
                   }`}
                 >
-                  <Icon className={`w-4 h-4 ${isActive ? "text-colonial-gold-light" : "text-colonial-clay"}`} />
+                  <Icon className={`w-3.5 h-3.5 ${isActive ? "text-colonial-gold-light" : "text-colonial-clay"}`} />
                   <span>{item.label}</span>
                 </button>
               );

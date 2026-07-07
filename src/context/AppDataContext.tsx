@@ -144,6 +144,61 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     localStorage.setItem("diriangen_thanksData", JSON.stringify(thanks));
   }, [thanks]);
 
+  // Sync changes to the server filesystem (API) so they are committed on GitHub sync
+  useEffect(() => {
+    if (!biography || timeline.length === 0) return;
+
+    const saveDataToServer = async () => {
+      try {
+        const response = await fetch("/api/save-data", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            biography,
+            timeline,
+            articles,
+            gallery,
+            songs,
+          }),
+        });
+        if (response.ok) {
+          console.log("Cambios guardados exitosamente en el servidor (src/data.ts). Listo para sincronizar con GitHub.");
+        }
+      } catch (error) {
+        console.warn("No se pudo guardar la información en el disco del servidor.", error);
+      }
+    };
+
+    const timer = setTimeout(saveDataToServer, 1000);
+    return () => clearTimeout(timer);
+  }, [biography, timeline, articles, gallery, songs]);
+
+  useEffect(() => {
+    if (students.length === 0) return;
+
+    const saveMediaToServer = async () => {
+      try {
+        const response = await fetch("/api/save-media", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ students }),
+        });
+        if (response.ok) {
+          console.log("Cambios de estudiantes guardados exitosamente en el servidor (src/config/mediaConfig.ts). Listo para sincronizar con GitHub.");
+        }
+      } catch (error) {
+        console.warn("No se pudo guardar la información de estudiantes en el disco del servidor.", error);
+      }
+    };
+
+    const timer = setTimeout(saveMediaToServer, 1000);
+    return () => clearTimeout(timer);
+  }, [students]);
+
   const setBiography = (val: typeof defaultBiographyData) => setBiographyState(val);
   const setTimeline = (val: TimelineItem[]) => setTimelineState(val);
   const setArticles = (val: Article[]) => setArticlesState(val);
