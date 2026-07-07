@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { X, Upload, FileImage, Clipboard, Check, Info } from "lucide-react";
+import { X, Upload, FileImage, Clipboard, Check, Info, RefreshCw } from "lucide-react";
 
 export interface FieldConfig {
   name: string;
@@ -30,6 +30,7 @@ export default function EditModal({
   const [dragActive, setDragActive] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [copiedNotification, setCopiedNotification] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -59,11 +60,46 @@ export default function EditModal({
       return;
     }
 
+    setIsUploading(true);
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       if (event.target?.result) {
-        handleChange(fieldName, event.target.result as string);
+        const base64Data = event.target.result as string;
+        try {
+          const response = await fetch("/api/save-media", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              image: base64Data,
+              filename: file.name,
+            }),
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.url) {
+              handleChange(fieldName, data.url);
+              setIsUploading(false);
+              return;
+            }
+          }
+          // Fallback if server response is not successful
+          handleChange(fieldName, base64Data);
+        } catch (error) {
+          console.error("Error uploading image to server:", error);
+          // Fallback to local Base64
+          handleChange(fieldName, base64Data);
+        } finally {
+          setIsUploading(false);
+        }
+      } else {
+        setIsUploading(false);
       }
+    };
+    reader.onerror = () => {
+      setIsUploading(false);
     };
     reader.readAsDataURL(file);
   };
@@ -186,7 +222,13 @@ export default function EditModal({
                           className="hidden"
                         />
 
-                        {currentValue ? (
+                        {isUploading ? (
+                          <div className="flex flex-col items-center justify-center space-y-2 text-colonial-terracotta">
+                            <RefreshCw className="w-6 h-6 animate-spin text-colonial-terracotta" />
+                            <p className="text-xs font-sans font-bold">Subiendo imagen al servidor...</p>
+                            <p className="text-[10px] text-colonial-dark/50">Por favor espera un momento</p>
+                          </div>
+                        ) : currentValue ? (
                           <div className="flex items-center space-x-3 text-colonial-dark">
                             <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-colonial-sand shrink-0 shadow-sm bg-white">
                               <img
@@ -216,7 +258,7 @@ export default function EditModal({
                                 <span className="text-colonial-terracotta hover:underline font-bold">Selecciona un archivo</span> o arrástralo aquí
                               </p>
                               <p className="text-[10px] text-colonial-dark/50 font-mono mt-1">
-                                PNG, JPG, JPEG, WEBP (guardado offline automático)
+                                PNG, JPG, JPEG, WEBP (guardado físico automático)
                               </p>
                             </div>
                           </>
@@ -268,9 +310,15 @@ export default function EditModal({
             </button>
             <button
               onClick={handleSubmit}
-              className="px-5 py-2.5 rounded-xl bg-colonial-terracotta hover:bg-colonial-terracotta-dark text-white text-sm font-display font-bold shadow-md hover:shadow-lg transition-all cursor-pointer flex items-center space-x-2"
+              disabled={isUploading}
+              className={`px-5 py-2.5 rounded-xl text-white text-sm font-display font-bold shadow-md transition-all flex items-center space-x-2 ${
+                isUploading
+                  ? "bg-gray-400 cursor-not-allowed opacity-70"
+                  : "bg-colonial-terracotta hover:bg-colonial-terracotta-dark hover:shadow-lg cursor-pointer"
+              }`}
             >
-              <span>Guardar Cambios</span>
+              {isUploading && <RefreshCw className="w-4 h-4 animate-spin text-white" />}
+              <span>{isUploading ? "Subiendo..." : "Guardar Cambios"}</span>
             </button>
           </div>
         </motion.div>
