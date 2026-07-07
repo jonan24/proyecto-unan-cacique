@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { X, Upload, FileImage, Clipboard, Check, Info, RefreshCw } from "lucide-react";
+import { resolveImageUrl } from "../config/imageHelper";
 
 export interface FieldConfig {
   name: string;
@@ -232,7 +233,7 @@ export default function EditModal({
                           <div className="flex items-center space-x-3 text-colonial-dark">
                             <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-colonial-sand shrink-0 shadow-sm bg-white">
                               <img
-                                src={currentValue}
+                                src={resolveImageUrl(currentValue)}
                                 alt="Previsualización"
                                 className="w-full h-full object-cover"
                                 referrerPolicy="no-referrer"

@@ -115,37 +115,74 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return local ? JSON.parse(local) : defaultThanksData;
   });
 
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
+
+  // Load latest data from the server API immediately upon mount (syncs other devices on load)
+  useEffect(() => {
+    const fetchServerData = async () => {
+      try {
+        const response = await fetch("/api/get-data");
+        if (response.ok) {
+          const res = await response.json();
+          if (res.success && res.data) {
+            const { biography: sBio, timeline: sTime, articles: sArt, gallery: sGal, songs: sSong, students: sStud } = res.data;
+            if (sBio) setBiographyState(sBio);
+            if (sTime) setTimelineState(sTime);
+            if (sArt) setArticlesState(sArt);
+            if (sGal) setGalleryState(sGal);
+            if (sSong) setSongsState(sSong);
+            if (sStud) setStudentsState(sStud);
+            console.log("Datos cargados del servidor y sincronizados.");
+          }
+        }
+      } catch (error) {
+        console.warn("No se pudieron inicializar los datos del servidor:", error);
+      } finally {
+        setIsInitialized(true);
+      }
+    };
+    fetchServerData();
+  }, []);
+
   // Persist edits to localStorage automatically on state changes
   useEffect(() => {
+    if (!isInitialized) return;
     localStorage.setItem("diriangen_biographyData", JSON.stringify(biography));
-  }, [biography]);
+  }, [biography, isInitialized]);
 
   useEffect(() => {
+    if (!isInitialized) return;
     localStorage.setItem("diriangen_timelineItems", JSON.stringify(timeline));
-  }, [timeline]);
+  }, [timeline, isInitialized]);
 
   useEffect(() => {
+    if (!isInitialized) return;
     localStorage.setItem("diriangen_encyclopediaArticles", JSON.stringify(articles));
-  }, [articles]);
+  }, [articles, isInitialized]);
 
   useEffect(() => {
+    if (!isInitialized) return;
     localStorage.setItem("diriangen_galleryItems", JSON.stringify(gallery));
-  }, [gallery]);
+  }, [gallery, isInitialized]);
 
   useEffect(() => {
+    if (!isInitialized) return;
     localStorage.setItem("diriangen_songsData", JSON.stringify(songs));
-  }, [songs]);
+  }, [songs, isInitialized]);
 
   useEffect(() => {
+    if (!isInitialized) return;
     localStorage.setItem("diriangen_studentGroupConfig", JSON.stringify(students));
-  }, [students]);
+  }, [students, isInitialized]);
 
   useEffect(() => {
+    if (!isInitialized) return;
     localStorage.setItem("diriangen_thanksData", JSON.stringify(thanks));
-  }, [thanks]);
+  }, [thanks, isInitialized]);
 
   // Sync changes to the server filesystem (API) so they are committed on GitHub sync
   useEffect(() => {
+    if (!isInitialized) return;
     if (!biography || timeline.length === 0) return;
 
     const saveDataToServer = async () => {
@@ -173,9 +210,10 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     const timer = setTimeout(saveDataToServer, 1000);
     return () => clearTimeout(timer);
-  }, [biography, timeline, articles, gallery, songs]);
+  }, [biography, timeline, articles, gallery, songs, isInitialized]);
 
   useEffect(() => {
+    if (!isInitialized) return;
     if (students.length === 0) return;
 
     const saveMediaToServer = async () => {
@@ -197,7 +235,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     const timer = setTimeout(saveMediaToServer, 1000);
     return () => clearTimeout(timer);
-  }, [students]);
+  }, [students, isInitialized]);
 
   const setBiography = (val: typeof defaultBiographyData) => setBiographyState(val);
   const setTimeline = (val: TimelineItem[]) => setTimelineState(val);

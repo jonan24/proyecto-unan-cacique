@@ -4,6 +4,7 @@ import { Mail, Phone, Github, GraduationCap, Award, Users, Edit3, Trash2, Plus }
 import { useAppData } from "../context/AppDataContext";
 import EditModal, { FieldConfig } from "./EditModal";
 import { StudentMember } from "../config/mediaConfig";
+import { resolveImageUrl } from "../config/imageHelper";
 
 export default function StudentCredits() {
   const { isEditMode, students, updateStudent, addStudent, deleteStudent } = useAppData();
@@ -129,7 +130,7 @@ export default function StudentCredits() {
                 <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-colonial-sand shadow-inner group-hover:border-colonial-terracotta transition-colors duration-300 relative">
                   <img
                     // REFERENCIA DE RUTA: Ruta de la foto del estudiante (definida en /src/config/mediaConfig.ts)
-                    src={student.url}
+                    src={resolveImageUrl(student.url)}
                     alt={student.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     referrerPolicy="no-referrer"

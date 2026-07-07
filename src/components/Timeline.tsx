@@ -4,6 +4,7 @@ import { useAppData } from "../context/AppDataContext";
 import EditModal, { FieldConfig } from "./EditModal";
 import { TimelineItem } from "../data";
 import { Calendar, Eye, X, ChevronRight, Award, Edit3, Trash2, Plus } from "lucide-react";
+import { resolveImageUrl } from "../config/imageHelper";
 
 export default function Timeline() {
   const { isEditMode, timeline, updateTimelineItem, addTimelineItem, deleteTimelineItem } = useAppData();
@@ -240,7 +241,7 @@ export default function Timeline() {
                 {selectedItem.image && (
                   <div className="relative h-48 sm:h-64 w-full rounded-xl overflow-hidden border border-colonial-gold/20 shadow-inner">
                     <img
-                      src={selectedItem.image}
+                      src={resolveImageUrl(selectedItem.image)}
                       alt={selectedItem.title}
                       className="w-full h-full object-cover object-center"
                       referrerPolicy="no-referrer"

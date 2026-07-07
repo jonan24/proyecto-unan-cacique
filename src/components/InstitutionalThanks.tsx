@@ -3,6 +3,7 @@ import { motion } from "motion/react";
 import { Heart, Landmark, ShieldCheck, Award, Quote, ChevronRight, Edit3 } from "lucide-react";
 import { useAppData } from "../context/AppDataContext";
 import EditModal, { FieldConfig } from "./EditModal";
+import { resolveImageUrl } from "../config/imageHelper";
 
 export default function InstitutionalThanks() {
   const { isEditMode, thanks, setThanks } = useAppData();
@@ -76,7 +77,7 @@ export default function InstitutionalThanks() {
             <div className="relative aspect-3/4 w-full rounded-xl overflow-hidden border border-colonial-sand shadow-inner bg-colonial-cream">
               <img
                 // REFERENCIA DE RUTA: Retrato del Comandante Daniel Ortega, guardado localmente
-                src={thanks.danielOrtegaPortrait}
+                src={resolveImageUrl(thanks.danielOrtegaPortrait)}
                 alt="Comandante Daniel Ortega"
                 className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"
@@ -117,7 +118,7 @@ export default function InstitutionalThanks() {
           <div className="relative h-44 rounded-xl overflow-hidden border border-colonial-sand bg-gradient-to-r from-red-700 via-zinc-900 to-black">
             <img
               // REFERENCIA DE RUTA: Bandera y Escudo Institucional local
-              src={thanks.fslnFlagEmblem}
+              src={resolveImageUrl(thanks.fslnFlagEmblem)}
               alt="Bandera FSLN y Emblema UNAN"
               className="w-full h-full object-cover mix-blend-luminosity hover:mix-blend-normal transition-all duration-500 opacity-90"
               referrerPolicy="no-referrer"

@@ -4,6 +4,7 @@ import { useAppData } from "../context/AppDataContext";
 import EditModal, { FieldConfig } from "./EditModal";
 import { GalleryItem } from "../data";
 import { Maximize2, X, ChevronLeft, ChevronRight, Image as ImageIcon, Sparkles, Edit3, Trash2, Plus } from "lucide-react";
+import { resolveImageUrl } from "../config/imageHelper";
 
 export default function Gallery() {
   const { isEditMode, gallery, updateGalleryItem, addGalleryItem, deleteGalleryItem } = useAppData();
@@ -212,7 +213,7 @@ export default function Gallery() {
                 className="relative h-64 overflow-hidden bg-colonial-cream cursor-pointer"
               >
                 <img
-                  src={item.image}
+                  src={resolveImageUrl(item.image)}
                   alt={item.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   referrerPolicy="no-referrer"
@@ -291,7 +292,7 @@ export default function Gallery() {
                 className="max-h-[60vh] sm:max-h-[70vh] max-w-full overflow-hidden flex items-center justify-center rounded-xl border border-white/10 shadow-2xl relative"
               >
                 <img
-                  src={filteredItems[lightboxIndex].image}
+                  src={resolveImageUrl(filteredItems[lightboxIndex].image)}
                   alt={filteredItems[lightboxIndex].title}
                   className="max-h-full max-w-full object-contain"
                   referrerPolicy="no-referrer"

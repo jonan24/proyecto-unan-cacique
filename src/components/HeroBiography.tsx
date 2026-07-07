@@ -3,6 +3,7 @@ import { motion } from "motion/react";
 import { useAppData } from "../context/AppDataContext";
 import EditModal, { FieldConfig } from "./EditModal";
 import { Quote, Sparkles, Shield, Compass, Edit3 } from "lucide-react";
+import { resolveImageUrl } from "../config/imageHelper";
 
 export default function HeroBiography() {
   const { isEditMode, biography, setBiography } = useAppData();
@@ -98,7 +99,7 @@ export default function HeroBiography() {
         {/* Main Hero Image */}
         <div className="relative h-[450px] sm:h-[550px] w-full overflow-hidden">
           <img
-            src={biography.image || "/assets/images/cacique_diriangen_hero_1783307374586.jpg"}
+            src={resolveImageUrl(biography.image) || "/assets/images/cacique_diriangen_hero_1783307374586.jpg"}
             alt="Cacique Diriangén luchando contra invasores"
             className="w-full h-full object-cover object-center scale-105 hover:scale-100 transition-transform duration-700"
             referrerPolicy="no-referrer"

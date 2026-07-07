@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { useAppData } from "../context/AppDataContext";
 import EditModal, { FieldConfig } from "./EditModal";
 import { Song } from "../data";
+import { resolveImageUrl } from "../config/imageHelper";
 import {
   Play,
   Pause,
@@ -290,7 +291,7 @@ export default function Cancionero() {
             {/* Ambient abstract visual overlay */}
             <div className="absolute inset-0 opacity-15">
               <img
-                src="/assets/images/revolutionary_music_guitar_1783307397450.jpg"
+                src={resolveImageUrl("/assets/images/revolutionary_music_guitar_1783307397450.jpg")}
                 alt="Guitarra Colonial de León"
                 className="w-full h-full object-cover filter sepia blur-xs scale-110"
                 referrerPolicy="no-referrer"
