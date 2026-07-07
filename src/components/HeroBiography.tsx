@@ -10,6 +10,7 @@ export default function HeroBiography() {
 
   const fields: FieldConfig[] = [
     { name: "name", label: "Nombre del Héroe", type: "text" },
+    { name: "image", label: "Imagen de Portada", type: "image" },
     { name: "title", label: "Título / Rango", type: "text" },
     { name: "period", label: "Periodo Histórico", type: "text" },
     { name: "birthPlace", label: "Lugar de Origen", type: "text" },
@@ -28,6 +29,7 @@ export default function HeroBiography() {
   const handleSave = (values: Record<string, any>) => {
     setBiography({
       name: values.name || biography.name,
+      image: values.image || biography.image || "",
       title: values.title || biography.title,
       period: values.period || biography.period,
       birthPlace: values.birthPlace || biography.birthPlace,
@@ -96,7 +98,7 @@ export default function HeroBiography() {
         {/* Main Hero Image */}
         <div className="relative h-[450px] sm:h-[550px] w-full overflow-hidden">
           <img
-            src="/assets/images/cacique_diriangen_hero_1783307374586.jpg"
+            src={biography.image || "/assets/images/cacique_diriangen_hero_1783307374586.jpg"}
             alt="Cacique Diriangén luchando contra invasores"
             className="w-full h-full object-cover object-center scale-105 hover:scale-100 transition-transform duration-700"
             referrerPolicy="no-referrer"
@@ -242,6 +244,7 @@ export default function HeroBiography() {
         fields={fields}
         initialValues={{
           name: biography.name,
+          image: biography.image || "",
           title: biography.title,
           period: biography.period,
           birthPlace: biography.birthPlace,

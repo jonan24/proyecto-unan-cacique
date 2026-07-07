@@ -39,6 +39,7 @@ export interface Song {
 
 export const biographyData = {
   name: "Cacique Diriangén",
+  image: "/assets/images/cacique_diriangen_hero_1783307374586.jpg",
   title: "Señor de las Tierras de los Dirianes",
   period: "Fl. 1523",
   birthPlace: "Meseta de los Pueblos, Nicaragua",
