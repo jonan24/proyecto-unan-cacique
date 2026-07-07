@@ -1,10 +1,9 @@
 import express from "express";
 import path from "path";
-import { createServer as createViteServer } from "vite";
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = process.env.PORT || 3000;
 
   // Body parsers
   app.use(express.json({ limit: "50mb" }));
@@ -106,8 +105,13 @@ export const studentGroupConfig: StudentMember[] = ${JSON.stringify(students, nu
     }
   });
 
+  // Auto-detect production mode based on env or filename
+  const isProduction = process.env.NODE_ENV === "production" || 
+                       (typeof process.argv[1] === "string" && !process.argv[1].endsWith("server.ts"));
+
   // Vite middleware for development
-  if (process.env.NODE_ENV !== "production") {
+  if (!isProduction) {
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
@@ -121,8 +125,8 @@ export const studentGroupConfig: StudentMember[] = ${JSON.stringify(students, nu
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+  app.listen(Number(PORT), "0.0.0.0", () => {
+    console.log(`Server running in ${isProduction ? "production" : "development"} mode on port ${PORT}`);
   });
 }
 
