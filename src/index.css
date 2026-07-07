@@ -62,7 +62,7 @@
 .colonial-border-bottom {
   border-bottom: 1px solid rgba(45, 27, 8, 0.15);
 }
-
+#hola
 .title-ornament::before, .title-ornament::after {
   content: " — ";
   color: var(--color-colonial-terracotta);
