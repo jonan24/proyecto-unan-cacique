@@ -40,9 +40,9 @@ interface AppDataContextProps {
   
   timeline: TimelineItem[];
   setTimeline: (val: TimelineItem[]) => void;
-  updateTimelineItem: (index: number, val: TimelineItem) => void;
+  updateTimelineItem: (year: string, val: TimelineItem) => void;
   addTimelineItem: (val: TimelineItem) => void;
-  deleteTimelineItem: (index: number) => void;
+  deleteTimelineItem: (year: string) => void;
   
   articles: Article[];
   setArticles: (val: Article[]) => void;
@@ -125,13 +125,14 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
         if (response.ok) {
           const res = await response.json();
           if (res.success && res.data) {
-            const { biography: sBio, timeline: sTime, articles: sArt, gallery: sGal, songs: sSong, students: sStud } = res.data;
+            const { biography: sBio, timeline: sTime, articles: sArt, gallery: sGal, songs: sSong, students: sStud, thanks: sThanks } = res.data;
             if (sBio) setBiographyState(sBio);
             if (sTime) setTimelineState(sTime);
             if (sArt) setArticlesState(sArt);
             if (sGal) setGalleryState(sGal);
             if (sSong) setSongsState(sSong);
             if (sStud) setStudentsState(sStud);
+            if (sThanks) setThanksState(sThanks);
             console.log("Datos cargados del servidor y sincronizados.");
           }
         }
@@ -214,7 +215,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   useEffect(() => {
     if (!isInitialized) return;
-    if (students.length === 0) return;
+    if (students.length === 0 && !thanks) return;
 
     const saveMediaToServer = async () => {
       try {
@@ -223,19 +224,19 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ students }),
+          body: JSON.stringify({ students, thanks }),
         });
         if (response.ok) {
-          console.log("Cambios de estudiantes guardados exitosamente en el servidor (src/config/mediaConfig.ts). Listo para sincronizar con GitHub.");
+          console.log("Cambios de estudiantes y agradecimientos guardados exitosamente en el servidor (src/config/mediaConfig.ts). Listo para sincronizar con GitHub.");
         }
       } catch (error) {
-        console.warn("No se pudo guardar la información de estudiantes en el disco del servidor.", error);
+        console.warn("No se pudo guardar la información de estudiantes e institucional en el disco del servidor.", error);
       }
     };
 
     const timer = setTimeout(saveMediaToServer, 1000);
     return () => clearTimeout(timer);
-  }, [students, isInitialized]);
+  }, [students, thanks, isInitialized]);
 
   const setBiography = (val: typeof defaultBiographyData) => setBiographyState(val);
   const setTimeline = (val: TimelineItem[]) => setTimelineState(val);
@@ -246,16 +247,14 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const setThanks = (val: ThanksData) => setThanksState(val);
 
   // Individual update utilities
-  const updateTimelineItem = (index: number, val: TimelineItem) => {
-    const updated = [...timeline];
-    updated[index] = val;
-    setTimelineState(updated);
+  const updateTimelineItem = (year: string, val: TimelineItem) => {
+    setTimelineState(timeline.map(item => item.year === year ? val : item));
   };
   const addTimelineItem = (val: TimelineItem) => {
     setTimelineState([...timeline, val]);
   };
-  const deleteTimelineItem = (index: number) => {
-    setTimelineState(timeline.filter((_, i) => i !== index));
+  const deleteTimelineItem = (year: string) => {
+    setTimelineState(timeline.filter(item => item.year !== year));
   };
 
   const updateArticle = (id: string, val: Article) => {

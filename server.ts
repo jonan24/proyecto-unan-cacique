@@ -90,11 +90,16 @@ async function startServer() {
     const match = fileContent.match(regex);
     if (match && match[1]) {
       try {
-        let jsonStr = match[1].trim();
-        if (jsonStr.endsWith(";")) {
-          jsonStr = jsonStr.slice(0, -1);
+        let cleanStr = match[1].trim();
+        while (cleanStr.endsWith(";")) {
+          cleanStr = cleanStr.slice(0, -1).trim();
         }
-        return JSON.parse(jsonStr);
+        try {
+          return JSON.parse(cleanStr);
+        } catch (jsonErr) {
+          // Fallback to a safer Function execution for JS/TS object/array literals
+          return new Function(`return (${cleanStr})`)();
+        }
       } catch (e) {
         console.error(`Error parsing variable ${variableName} from TS:`, e);
       }
@@ -224,11 +229,29 @@ export const songsData: Song[] = ${JSON.stringify(songsClean, null, 2)};
         return res.json({ success: true, url: image });
       }
 
-      // Case 2: Save students configuration (original behavior)
-      const { students } = req.body;
-      if (students) {
-        const studentsClean = await sanitiseDataAndSaveImages(students);
-        const fileContent = `// ARCHIVO AUTO-GENERADO POR EL MODO EDICIÓN DE NICARAGUA INDÓMITA
+      // Case 2: Save students or thanks configuration
+      const { students, thanks } = req.body;
+      if (students !== undefined || thanks !== undefined) {
+        let finalStudents = students;
+        let finalThanks = thanks;
+
+        // Try reading existing file first so we do not overwrite one with blank if only the other was updated
+        try {
+          const content = await fs.readFile(path.join(process.cwd(), "src/config/mediaConfig.ts"), "utf-8");
+          if (finalStudents === undefined) {
+            finalStudents = extractJsonFromTs(content, "studentGroupConfig");
+          }
+          if (finalThanks === undefined) {
+            finalThanks = extractJsonFromTs(content, "thanksData");
+          }
+        } catch (err) {
+          // File may not exist yet, which is fine
+        }
+
+        const studentsClean = await sanitiseDataAndSaveImages(finalStudents || []);
+        const thanksClean = await sanitiseDataAndSaveImages(finalThanks || null);
+
+        let fileContent = `// ARCHIVO AUTO-GENERADO POR EL MODO EDICIÓN DE NICARAGUA INDÓMITA
 // Guarda este archivo como "src/config/mediaConfig.ts" en tu repositorio para fijar los cambios de manera definitiva.
 
 export interface StudentMember {
@@ -242,11 +265,22 @@ export interface StudentMember {
   url: string;
 }
 
+export interface ThanksData {
+  danielOrtegaPortrait: string;
+  fslnFlagEmblem: string;
+  quoteText: string;
+  thanksParagraphs: string[];
+}
+
 export const studentGroupConfig: StudentMember[] = ${JSON.stringify(studentsClean, null, 2)};
 `;
 
+        if (thanksClean) {
+          fileContent += `\nexport const thanksData: ThanksData = ${JSON.stringify(thanksClean, null, 2)};\n`;
+        }
+
         await fs.writeFile(path.join(process.cwd(), "src/config/mediaConfig.ts"), fileContent, "utf-8");
-        return res.json({ success: true, message: "Datos de estudiantes guardados en src/config/mediaConfig.ts" });
+        return res.json({ success: true, message: "Datos de estudiantes y agradecimientos guardados en src/config/mediaConfig.ts" });
       }
 
       return res.status(400).json({ success: false, error: "Cuerpo de solicitud inválido" });
@@ -279,9 +313,11 @@ export const studentGroupConfig: StudentMember[] = ${JSON.stringify(studentsClea
       }
 
       let students = null;
+      let thanks = null;
       try {
         const mediaConfigContent = await fs.readFile(path.join(process.cwd(), "src/config/mediaConfig.ts"), "utf-8");
         students = extractJsonFromTs(mediaConfigContent, "studentGroupConfig");
+        thanks = extractJsonFromTs(mediaConfigContent, "thanksData");
       } catch (err) {
         console.warn("Could not read src/config/mediaConfig.ts, will use defaults:", err);
       }
@@ -295,6 +331,7 @@ export const studentGroupConfig: StudentMember[] = ${JSON.stringify(studentsClea
           gallery,
           songs,
           students,
+          thanks,
         }
       });
     } catch (error: any) {
