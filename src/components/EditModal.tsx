@@ -29,7 +29,6 @@ export default function EditModal({
 }: EditModalProps) {
   const [values, setValues] = useState<Record<string, any>>({});
   const [dragActive, setDragActive] = useState<boolean>(false);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [copiedNotification, setCopiedNotification] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState<boolean>(false);
 
@@ -121,8 +120,8 @@ export default function EditModal({
     }
   };
 
-  const triggerFileInput = () => {
-    fileInputRef.current?.click();
+  const triggerFileInput = (fieldName: string) => {
+    document.getElementById(`file-input-${fieldName}`)?.click();
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -213,10 +212,10 @@ export default function EditModal({
                             ? "border-colonial-gold/50 bg-colonial-cream/10 hover:border-colonial-terracotta/50"
                             : "border-colonial-sand hover:border-colonial-terracotta bg-white"
                         }`}
-                        onClick={triggerFileInput}
+                        onClick={() => triggerFileInput(field.name)}
                       >
                         <input
-                          ref={fileInputRef}
+                          id={`file-input-${field.name}`}
                           type="file"
                           accept="image/*"
                           onChange={(e) => handleFileChange(e, field.name)}
