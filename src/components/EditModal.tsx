@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { X, Upload, FileImage, Clipboard, Check, Info, RefreshCw } from "lucide-react";
 import { resolveImageUrl } from "../config/imageHelper";
+import { compressImage } from "../utils/imageCompressor";
 
 export interface FieldConfig {
   name: string;
@@ -54,54 +55,50 @@ export default function EditModal({
     }
   };
 
-  const processFile = (file: File, fieldName: string) => {
+  const processFile = async (file: File, fieldName: string) => {
     if (!file.type.startsWith("image/")) {
       alert("Por favor selecciona únicamente archivos de imagen (PNG, JPG, JPEG, WEBP, etc.).");
       return;
     }
 
     setIsUploading(true);
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      if (event.target?.result) {
-        const base64Data = event.target.result as string;
-        try {
-          const response = await fetch("/api/save-media", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              image: base64Data,
-              filename: file.name,
-            }),
-          });
-          
-          if (response.ok) {
-            const data = await response.json();
-            if (data.success && data.url) {
-              handleChange(fieldName, data.url);
-              setIsUploading(false);
-              return;
-            }
+    try {
+      // Compress image to ensure it's under typical file upload sizes and loads incredibly fast!
+      const base64Data = await compressImage(file, 1200, 1200, 0.85);
+      
+      try {
+        const response = await fetch("/api/save-media", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            image: base64Data,
+            filename: file.name,
+          }),
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.url) {
+            handleChange(fieldName, data.url);
+            setIsUploading(false);
+            return;
           }
-          // Fallback if server response is not successful
-          handleChange(fieldName, base64Data);
-        } catch (error) {
-          console.error("Error uploading image to server:", error);
-          // Fallback to local Base64
-          handleChange(fieldName, base64Data);
-        } finally {
-          setIsUploading(false);
         }
-      } else {
-        setIsUploading(false);
+        // Fallback if server response is not successful
+        handleChange(fieldName, base64Data);
+      } catch (error) {
+        console.error("Error uploading image to server:", error);
+        // Fallback to local Base64
+        handleChange(fieldName, base64Data);
       }
-    };
-    reader.onerror = () => {
+    } catch (compressErr) {
+      console.error("Error compressing image:", compressErr);
+      alert("No se pudo procesar la imagen seleccionada. Por favor intenta con otra.");
+    } finally {
       setIsUploading(false);
-    };
-    reader.readAsDataURL(file);
+    }
   };
 
   const handleDrop = (e: React.DragEvent, fieldName: string) => {
