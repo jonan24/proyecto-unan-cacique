@@ -111,7 +111,25 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const [students, setStudentsState] = useState<StudentMember[]>(() => {
     const local = localStorage.getItem("diriangen_studentGroupConfig");
-    return local ? JSON.parse(local) : defaultStudentGroupConfig;
+    if (local) {
+      try {
+        const parsed = JSON.parse(local);
+        const hasOldPlaceholder = parsed.some((s: any) => 
+          s.name?.includes("Jonathan Alexander") || 
+          s.name?.includes("Rostrán") || 
+          s.name?.includes("Espinoza Leytón")
+        );
+        if (hasOldPlaceholder) {
+          console.log("Detectados nombres de colaboradores antiguos/obsoletos en localStorage. Limpiando y restaurando configuración oficial.");
+          localStorage.removeItem("diriangen_studentGroupConfig");
+          return defaultStudentGroupConfig;
+        }
+        return parsed;
+      } catch (e) {
+        return defaultStudentGroupConfig;
+      }
+    }
+    return defaultStudentGroupConfig;
   });
 
   const [thanks, setThanksState] = useState<ThanksData>(() => {

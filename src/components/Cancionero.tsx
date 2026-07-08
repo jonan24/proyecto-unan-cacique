@@ -43,7 +43,7 @@ export default function Cancionero() {
     { name: "author", label: "Autor / Intérprete", type: "text", placeholder: "Ej. Carlos Mejía Godoy" },
     { name: "genre", label: "Género / Estilo", type: "text", placeholder: "Ej. Música Testimonial" },
     { name: "duration", label: "Duración (Minutos:Segundos)", type: "text", placeholder: "Ej. 3:45" },
-    { name: "audioUrl", label: "Ruta del Archivo de Audio (MP3)", type: "text", placeholder: "Ej. /assets/audio/nicaraguita.mp3" },
+    { name: "audioUrl", label: "Ruta del Archivo de Audio (MP3)", type: "audio", placeholder: "Ej. /assets/audio/nicaraguita.mp3" },
     { name: "description", label: "Contexto Histórico / Social", type: "textarea", placeholder: "Explica cuándo se compuso y qué representa..." },
     { name: "lyrics", label: "Letra Completa", type: "textarea", placeholder: "Escribe la letra de la canción organizada en estrofas..." }
   ];

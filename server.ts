@@ -184,7 +184,52 @@ export const songsData: Song[] = ${JSON.stringify(songsClean, null, 2)};
     try {
       const fs = await import("fs/promises");
 
-      // Case 1: Image Upload / Base64 processing
+      // Case 1a: Audio Upload / Base64 processing
+      if (req.body.audio) {
+        const { audio, filename } = req.body;
+
+        // If it's already a clean relative URL on the server, return as is
+        if (typeof audio === "string" && audio.startsWith("/uploads/")) {
+          return res.json({ success: true, url: audio });
+        }
+
+        // If it is a base64 data URL, decode and save physically
+        if (typeof audio === "string" && audio.startsWith("data:")) {
+          const matches = audio.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+          if (!matches || matches.length !== 3) {
+            return res.status(400).json({ success: false, error: "Formato base64 de audio inválido" });
+          }
+
+          const mimeType = matches[1];
+          const base64Data = matches[2];
+          const buffer = Buffer.from(base64Data, "base64");
+
+          // Determine extension
+          let ext = "mp3";
+          if (mimeType.includes("wav")) ext = "wav";
+          else if (mimeType.includes("ogg")) ext = "ogg";
+          else if (mimeType.includes("m4a")) ext = "m4a";
+          else if (mimeType.includes("mpeg") || mimeType.includes("mp3")) ext = "mp3";
+
+          // Generate a clean filename with timestamp
+          const cleanBaseName = filename 
+            ? filename.replace(/[^a-z0-9]/gi, '_').toLowerCase() 
+            : "audio_upload";
+          const finalFilename = `${cleanBaseName}_${Date.now()}.${ext}`;
+
+          const uploadPath = path.join(process.cwd(), "public/uploads", finalFilename);
+          await fs.writeFile(uploadPath, buffer);
+
+          const publicUrl = `/uploads/${finalFilename}`;
+          console.log(`Audio guardado físicamente en: ${uploadPath} -> URL: ${publicUrl}`);
+          return res.json({ success: true, url: publicUrl });
+        }
+
+        // If it's just some other string, return as is
+        return res.json({ success: true, url: audio });
+      }
+
+      // Case 1b: Image Upload / Base64 processing
       if (req.body.image) {
         const { image, filename } = req.body;
 
