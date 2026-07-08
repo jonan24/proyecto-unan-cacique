@@ -212,7 +212,7 @@ export default function Timeline() {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-2xl bg-colonial-beige rounded-2xl border-2 border-colonial-gold border-double p-6 sm:p-8 shadow-2xl z-10 overflow-hidden text-colonial-dark"
+              className="relative w-full max-w-2xl bg-colonial-beige rounded-2xl border-2 border-colonial-gold border-double p-6 sm:p-8 shadow-2xl z-10 max-h-[90vh] overflow-y-auto text-colonial-dark"
             >
               {/* Top Banner Ornament */}
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-colonial-gold via-colonial-terracotta to-colonial-gold" />

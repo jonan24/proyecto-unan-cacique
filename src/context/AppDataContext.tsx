@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useRef } from "react";
 import { 
   biographyData as defaultBiographyData, 
   timelineItems as defaultTimelineItems, 
@@ -78,6 +78,10 @@ const AppDataContext = createContext<AppDataContextProps | undefined>(undefined)
 
 export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
+
+  // Track if a state change was caused by user action to prevent auto-overwriting files with stale localStorage
+  const isUserEditDataRef = useRef<boolean>(false);
+  const isUserEditMediaRef = useRef<boolean>(false);
 
   // Load initial state with local storage fallback
   const [biography, setBiographyState] = useState<typeof defaultBiographyData>(() => {
@@ -184,6 +188,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Sync changes to the server filesystem (API) so they are committed on GitHub sync
   useEffect(() => {
     if (!isInitialized) return;
+    if (!isUserEditDataRef.current) return; // ONLY save if triggered by a user edit!
     if (!biography || timeline.length === 0) return;
 
     const saveDataToServer = async () => {
@@ -202,6 +207,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
           }),
         });
         if (response.ok) {
+          isUserEditDataRef.current = false; // reset flag on successful save
           console.log("Cambios guardados exitosamente en el servidor (src/data.ts). Listo para sincronizar con GitHub.");
         }
       } catch (error) {
@@ -215,6 +221,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   useEffect(() => {
     if (!isInitialized) return;
+    if (!isUserEditMediaRef.current) return; // ONLY save if triggered by a user edit!
     if (students.length === 0 && !thanks) return;
 
     const saveMediaToServer = async () => {
@@ -227,6 +234,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
           body: JSON.stringify({ students, thanks }),
         });
         if (response.ok) {
+          isUserEditMediaRef.current = false; // reset flag on successful save
           console.log("Cambios de estudiantes y agradecimientos guardados exitosamente en el servidor (src/config/mediaConfig.ts). Listo para sincronizar con GitHub.");
         }
       } catch (error) {
@@ -238,62 +246,98 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return () => clearTimeout(timer);
   }, [students, thanks, isInitialized]);
 
-  const setBiography = (val: typeof defaultBiographyData) => setBiographyState(val);
-  const setTimeline = (val: TimelineItem[]) => setTimelineState(val);
-  const setArticles = (val: Article[]) => setArticlesState(val);
-  const setGallery = (val: GalleryItem[]) => setGalleryState(val);
-  const setSongs = (val: Song[]) => setSongsState(val);
-  const setStudents = (val: StudentMember[]) => setStudentsState(val);
-  const setThanks = (val: ThanksData) => setThanksState(val);
+  const setBiography = (val: typeof defaultBiographyData) => {
+    isUserEditDataRef.current = true;
+    setBiographyState(val);
+  };
+  const setTimeline = (val: TimelineItem[]) => {
+    isUserEditDataRef.current = true;
+    setTimelineState(val);
+  };
+  const setArticles = (val: Article[]) => {
+    isUserEditDataRef.current = true;
+    setArticlesState(val);
+  };
+  const setGallery = (val: GalleryItem[]) => {
+    isUserEditDataRef.current = true;
+    setGalleryState(val);
+  };
+  const setSongs = (val: Song[]) => {
+    isUserEditDataRef.current = true;
+    setSongsState(val);
+  };
+  const setStudents = (val: StudentMember[]) => {
+    isUserEditMediaRef.current = true;
+    setStudentsState(val);
+  };
+  const setThanks = (val: ThanksData) => {
+    isUserEditMediaRef.current = true;
+    setThanksState(val);
+  };
 
   // Individual update utilities
   const updateTimelineItem = (year: string, val: TimelineItem) => {
+    isUserEditDataRef.current = true;
     setTimelineState(timeline.map(item => item.year === year ? val : item));
   };
   const addTimelineItem = (val: TimelineItem) => {
+    isUserEditDataRef.current = true;
     setTimelineState([...timeline, val]);
   };
   const deleteTimelineItem = (year: string) => {
+    isUserEditDataRef.current = true;
     setTimelineState(timeline.filter(item => item.year !== year));
   };
 
   const updateArticle = (id: string, val: Article) => {
+    isUserEditDataRef.current = true;
     setArticlesState(articles.map(art => art.id === id ? val : art));
   };
   const addArticle = (val: Article) => {
+    isUserEditDataRef.current = true;
     setArticlesState([...articles, val]);
   };
   const deleteArticle = (id: string) => {
+    isUserEditDataRef.current = true;
     setArticlesState(articles.filter(art => art.id !== id));
   };
 
   const updateGalleryItem = (id: string, val: GalleryItem) => {
+    isUserEditDataRef.current = true;
     setGalleryState(gallery.map(item => item.id === id ? val : item));
   };
   const addGalleryItem = (val: GalleryItem) => {
+    isUserEditDataRef.current = true;
     setGalleryState([...gallery, val]);
   };
   const deleteGalleryItem = (id: string) => {
+    isUserEditDataRef.current = true;
     setGalleryState(gallery.filter(item => item.id !== id));
   };
 
   const updateSong = (id: string, val: Song) => {
+    isUserEditDataRef.current = true;
     setSongsState(songs.map(song => song.id === id ? val : song));
   };
   const addSong = (val: Song) => {
+    isUserEditDataRef.current = true;
     setSongsState([...songs, val]);
   };
   const deleteSong = (id: string) => {
+    isUserEditDataRef.current = true;
     setSongsState(songs.filter(song => song.id !== id));
   };
 
   const updateStudent = (id: string | number, val: StudentMember) => {
+    isUserEditMediaRef.current = true;
     setStudentsState(students.map(std => std.id === id ? val : std));
   };
   const addStudent = (val: StudentMember) => {
+    isUserEditMediaRef.current = true;
     setStudentsState([...students, val]);
   };
   const deleteStudent = (id: string | number) => {
+    isUserEditMediaRef.current = true;
     setStudentsState(students.filter(std => std.id !== id));
   };
 
